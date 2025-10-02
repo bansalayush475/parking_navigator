@@ -44,8 +44,12 @@ def create_app():
 
     # Create tables if they don't exist
     with app.app_context():
-        db.create_all()
-        print("✅ Database tables created/verified")
+        try:
+            db.create_all()
+            print("✅ Database tables created/verified")
+        except Exception as e:
+            print(f"⚠️ Database initialization error: {e}")
+            # Log error but don't crash - useful for first deployment
 
     # CLI commands
     @app.cli.command("seed")
@@ -107,4 +111,6 @@ def create_app():
 if __name__ == "__main__":
     app = create_app()
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    # Disable debug in production
+    debug_mode = os.environ.get("FLASK_ENV") == "development"
+    app.run(host="0.0.0.0", port=port, debug=debug_mode)

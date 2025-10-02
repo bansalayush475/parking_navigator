@@ -1,4 +1,4 @@
-# config.py
+# config.py - FINAL VERSION
 import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -18,8 +18,36 @@ class Config:
     # Database
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or \
         "sqlite:///" + os.path.join(INSTANCE_DIR, "parking.db")
+    
+    # Fix for different PostgreSQL drivers (using psycopg3)
+    if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
+        # Render provides postgres://, convert to postgresql+psycopg://
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace(
+            'postgres://', 
+            'postgresql+psycopg://', 
+            1
+        )
+    elif SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith('postgresql://'):
+        # Convert postgresql:// to postgresql+psycopg:// for psycopg3
+        SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace(
+            'postgresql://', 
+            'postgresql+psycopg://', 
+            1
+        )
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = DEBUG  # Log SQL queries in debug mode
+    
+    # Production database settings (for PostgreSQL)
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,      # Verify connections before using
+        'pool_recycle': 300,        # Recycle connections after 5 minutes
+        'pool_size': 10,            # Connection pool size
+        'max_overflow': 20,         # Additional connections if pool is full
+        'connect_args': {
+            'connect_timeout': 10,  # Connection timeout in seconds
+        }
+    }
     
     # WTForms
     WTF_CSRF_ENABLED = True
