@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="card-title mb-3 text-center">📝 Register</h3>
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+          {{ form.hidden_tag() }}  <!-- CSRF Token -->
+          
+          <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), 
+                          placeholder="your@email.com") }}
+            {% if form.email.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.email.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), 
+                             placeholder="Create a password") }}
+            {% if form.password.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.password.errors %}{{ error }}{% endfor %}
+              </div>
+            {% else %}
+              <div class="form-text">
+                Must be at least 6 characters long.
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.confirm_password.label(class="form-label") }}
+            {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), 
+                                     placeholder="Re-enter password") }}
+            {% if form.confirm_password.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.confirm_password.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn btn-success w-100">
+            {{ form.submit.label.text }}
+          </button>
+        </form>
+
+        <p class="text-center mt-3">
+          Already have an account?
+          <a href="{{ url_for('auth.login') }}">Login here</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

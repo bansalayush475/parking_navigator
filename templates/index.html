@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-md-8">
+    <h2 class="mb-0">🅿️ Available Parking Areas</h2>
+    <p class="text-muted">Real-time parking availability across campus</p>
+  </div>
+  <div class="col-md-4">
+    <!-- Search Bar -->
+    <input id="searchInput" 
+           class="form-control" 
+           type="search" 
+           placeholder="🔍 Search parking area..." 
+           aria-label="Search">
+  </div>
+</div>
+
+<!-- Parking Areas List -->
+<div id="areasContainer" class="row g-4">
+    {% if areas %}
+        {% for area in areas %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ area.name }}</h5>
+                    <p class="card-text text-muted">
+                        <small>📍 {{ area.location }}</small>
+                    </p>
+                    <hr>
+                    <div id="status-{{ area.id }}">
+                        <!-- Parking status will be loaded by JS -->
+                        <div class="text-center">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <em class="d-block mt-2 text-muted">Loading availability...</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <h4>📭 No Parking Areas Available</h4>
+                <p class="mb-0">There are currently no parking areas configured in the system.</p>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                    <hr>
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">
+                        Go to Admin Dashboard
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Legend -->
+{% if areas %}
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card bg-light">
+      <div class="card-body">
+        <h6 class="mb-2">Legend:</h6>
+        <div class="d-flex gap-3 flex-wrap">
+          <span><span class="badge bg-success">Available</span> = Spots available</span>
+          <span><span class="badge bg-danger">Full</span> = No spots available</span>
+          <span>🚗 Car | 🏍️ Bike | 🚌 Bus</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+    // Initialize parking status updates
+    document.addEventListener("DOMContentLoaded", () => {
+        // Fetch statuses immediately
+        fetchStatuses();
+        
+        // Refresh every 10 seconds
+        setInterval(fetchStatuses, 10000);
+    });
+</script>
+{% endblock %}
